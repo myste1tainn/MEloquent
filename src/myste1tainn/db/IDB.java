@@ -1,5 +1,6 @@
-package database;
+package myste1tainn.db;
 
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.List;
 
@@ -10,4 +11,6 @@ public interface IDB<T>
 {
 	List<T> executeQuery(String queryString) throws SQLException;
 	long executeNonQuery(String queryString) throws SQLException;
+	List<T> executeQuery(PreparedStatement pst) throws SQLException;
+	long executeNonQuery(PreparedStatement pst) throws SQLException;
 }

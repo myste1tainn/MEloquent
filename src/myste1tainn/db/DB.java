@@ -1,11 +1,12 @@
-package database;
+package myste1tainn.db;
 
-import model.Model;
-import utility.Config;
+import myste1tainn.model.Model;
+import myste1tainn.utils.Config;
 
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 public class DB<T extends Model> implements IDB
 {
@@ -14,7 +15,7 @@ public class DB<T extends Model> implements IDB
 	private Statement st = null;
 	private ResultSet rs = null;
 	private ResultSetMetaData rsMeta = null;
-	private Config config = new Config("database");
+	private Config config = new Config("myste1tainn");
 
 	public DB()
 	{
@@ -34,7 +35,7 @@ public class DB<T extends Model> implements IDB
 													config.get("username"),
 													config.get("password"));
 
-			st = this.connection.createStatement();
+			st = connection.createStatement();
 		}
 	}
 
@@ -45,18 +46,18 @@ public class DB<T extends Model> implements IDB
 	}
 
 	@Override
-	public synchronized ArrayList<HashMap<String, Object>> executeQuery(String queryString) throws SQLException
+	public synchronized Results executeQuery(String queryString) throws SQLException
 	{
 		connect();
 
 		rs = st.executeQuery(queryString);
 		rsMeta = rs.getMetaData();
-		ArrayList<HashMap<String, Object>> results = new ArrayList<HashMap<String, Object>>();
+		Results results = new Results();
 
 		try
 		{
 			while(rs.next()) {
-				HashMap<String, Object> row = new HashMap<String, Object>();
+				Row row = new Row();
 
 				for (int i = 1; i < rsMeta.getColumnCount() + 1; i++) {
 					Object a = rs.getObject(i);
@@ -90,13 +91,62 @@ public class DB<T extends Model> implements IDB
 		return affectedRows;
 	}
 
-	public PreparedStatement prepare(String queryString) throws SQLException
+	@Override
+	public Results executeQuery(PreparedStatement pst) throws SQLException
+	{
+		connect();
+		Results results = new Results();
+
+		try
+		{
+			if (pst.execute())
+			{
+				rs = pst.getResultSet();
+				rsMeta = rs.getMetaData();
+			}
+
+			while(rs.next()) {
+				Row row = new Row();
+
+				for (int i = 1; i < rsMeta.getColumnCount() + 1; i++) {
+					Object a = rs.getObject(i);
+
+					if (a != null)
+					{
+						row.put(rsMeta.getColumnName(i), a);
+					}
+				}
+
+				results.add(row);
+			}
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+		finally
+		{
+			disconnect();
+			return results;
+		}
+	}
+
+	@Override
+	public long executeNonQuery(PreparedStatement pst) throws SQLException
+	{
+		connect();
+		long affectedRows = pst.executeUpdate();
+		disconnect();
+		return affectedRows;
+	}
+
+	public synchronized PreparedStatement prepare(String queryString) throws SQLException
 	{
 		connect();
 		return connection.prepareStatement(queryString);
 	}
 
-	public int[] executeNonQueryBatch(PreparedStatement preparedStatement) throws SQLException
+	public synchronized int[] executeNonQueryBatch(PreparedStatement preparedStatement) throws SQLException
 	{
 		int[] affectedRows = preparedStatement.executeBatch();
 		disconnect();

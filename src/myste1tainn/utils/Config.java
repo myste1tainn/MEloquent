@@ -1,4 +1,4 @@
-package utility;
+package myste1tainn.utils;
 
 public class Config {
 
