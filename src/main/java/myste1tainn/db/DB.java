@@ -15,10 +15,10 @@ public class DB<T extends Model> implements IDB
 	private Statement st = null;
 	private ResultSet rs = null;
 	private ResultSetMetaData rsMeta = null;
-	private Config config = new Config("myste1tainn");
 
 	public DB()
 	{
+		Config.load("Database.properties");
 	}
 	public static DB defaultInstance() {
 		if (mDefaultInstance == null) {
@@ -31,9 +31,9 @@ public class DB<T extends Model> implements IDB
 	private synchronized void connect() throws SQLException
 	{
 		if (connection == null || connection.isClosed()) {
-			connection = DriverManager.getConnection(config.get("connectionString"),
-													config.get("username"),
-													config.get("password"));
+			connection = DriverManager.getConnection(Config.get("connectionString"),
+													Config.get("username"),
+													Config.get("password"));
 
 			st = connection.createStatement();
 		}
@@ -136,7 +136,7 @@ public class DB<T extends Model> implements IDB
 	{
 		connect();
 		long affectedRows = pst.executeUpdate();
-		disconnect();
+//		disconnect();
 		return affectedRows;
 	}
 

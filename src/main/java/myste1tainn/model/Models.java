@@ -1,8 +1,6 @@
 package myste1tainn.model;
 
-import com.google.common.reflect.TypeToken;
 import myste1tainn.db.DB;
-import myste1tainn.db.Query.Operator;
 import myste1tainn.db.Query.Type;
 import myste1tainn.db.Results;
 import myste1tainn.db.Row;
@@ -10,17 +8,24 @@ import myste1tainn.db.Row;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by Akeereena on 10/24/15.
  */
 public class Models<T extends Model> extends ArrayList<T>
 {
-	private Eloquent eloquent = null;
+	private DB db = new DB();
 
 	public Models()
-	{
+	{}
 
+	public Models(List<T> modelList)
+	{
+		for (T model:modelList)
+		{
+			this.add(model);
+		}
 	}
 
 	public int[] destroy()
@@ -34,13 +39,13 @@ public class Models<T extends Model> extends ArrayList<T>
 		int[] destroyedCount = null;
 		try
 		{
-			eloquent = new Eloquent<T>(get(0).table());
-			String deleteQuery = eloquent.where("id", "?").build(Type.DELETE);
+			T model = get(0);
+			String deleteQuery = model.where("id", "?").builder.build(Type.DELETE);
 			DB db = getDB(useIsolateDB);
 
 			PreparedStatement pst = db.prepare(deleteQuery);
 
-			Model m;
+			T m;
 			for (int i = 1; i < size()+1; i++)
 			{
 				m = get(i-1);
@@ -83,20 +88,20 @@ public class Models<T extends Model> extends ArrayList<T>
 		{
 			try
 			{
-				eloquent = new Eloquent<T>(get(0).table());
+				T model = get(0);
 				DB db = getDB(useIsolateDB);
 				PreparedStatement pst;
-				eloquent.setColumns(get(0).keySet().toArray());
-				eloquent.setValues(get(0).values().toArray());
-				eloquent.where("id", get(0).getLong("id"));
-				String sql = eloquent.build(Type.UPDATE);
+				model.builder.setColumns(get(0).keySet().toArray());
+				model.builder.setValues(get(0).values().toArray());
+				model.where("id", get(0).getLong("id"));
+				String sql = model.builder.build(Type.UPDATE);
 				pst = db.prepare(sql);
 
-				for (T item : this)
+				for (Model item : this)
 				{
-					eloquent.setValues(item.values().toArray());
-					eloquent.where("id", item.getLong("id"));
-					pst = eloquent.setArguments(pst);
+					model.builder.setValues(item.values().toArray());
+					model.where("id", item.getLong("id"));
+					pst = model.builder.setArguments(pst);
 					pst.addBatch();
 				}
 
@@ -117,9 +122,40 @@ public class Models<T extends Model> extends ArrayList<T>
 
 	private DB getDB(boolean useIsolateDB)
 	{
-		if (useIsolateDB)
-			return new DB();
-		else
-			return DB.defaultInstance();
+		return db;
+//		if (useIsolateDB)
+//			return new DB();
+//		else
+//			return DB.defaultInstance();
+	}
+
+	public ArrayList<T> toArrayList()
+	{
+		ArrayList<T> arrayList = new ArrayList<T>();
+
+		for (T item: this)
+		{
+			arrayList.add(item);
+		}
+
+		return arrayList;
+	}
+
+	public List<String> stringValueListForKey(String key)
+	{
+		ArrayList<String> valueList = new ArrayList<String>();
+
+		for (T item:this)
+		{
+			valueList.add(item.getString(key));
+		}
+
+		return valueList;
+	}
+
+	public Models<T> subList(int from, int to)
+	{
+		if (to > size()) to = size();
+		return new Models(super.subList(from,to));
 	}
 }

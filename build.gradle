@@ -1,0 +1,5 @@
+dependencies {
+	compile 'log4j:log4j:1.2.17'
+	compile 'apache:commons-lang3:3.4'
+	compile 'mysql:mysql-connector-java:5.1.34'
+}

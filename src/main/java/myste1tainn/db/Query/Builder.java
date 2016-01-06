@@ -31,7 +31,7 @@ public class Builder
 		this.grammar = grammar;
 	}
 
-	protected void setTable(String table)
+	public void setTable(String table)
 	{
 		this.table = table;
 	}
@@ -175,6 +175,8 @@ public class Builder
 
 	private String whereString()
 	{
+		if (wheres == null) return "";
+
 		String s = "WHERE ";
 		for (String where : wheres)
 		{
