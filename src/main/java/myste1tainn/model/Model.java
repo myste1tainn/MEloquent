@@ -161,6 +161,28 @@ public abstract class Model<T extends Model> extends Eloquent<T>
 		}
 	}
 
+	public void add(String col) {
+		add(col, 1);
+	}
+
+	public void add(String col, int value) {
+		try {
+			DB db = new DB();
+			String sql = "UPDATE " + this.getTable();
+			sql += " SET " + col + " = " + col + " + " + value;
+			sql += " WHERE id = " + this.getLong("id");
+			db.executeNonQuery(sql);
+		}
+		catch (SQLException e)
+		{
+			e.printStackTrace();
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+	}
+
 	public long save()
 	{
 		long affectedRows = 0;

@@ -93,8 +93,16 @@ public class Models<T extends Model> extends ArrayList<T>
 				PreparedStatement pst;
 				model.builder.setColumns(get(0).keySet().toArray());
 				model.builder.setValues(get(0).values().toArray());
-				model.where("id", get(0).getLong("id"));
-				String sql = model.builder.build(Type.UPDATE);
+
+				String sql = "";
+				if (get(0).getLong("id") == null) {
+					model.builder.setTable(model.getTable());
+					sql = model.builder.build(Type.INSERT);
+				} else {
+					model.where("id", get(0).getLong("id"));
+					sql = model.builder.build(Type.UPDATE);
+				}
+
 				pst = db.prepare(sql);
 
 				for (Model item : this)
@@ -158,4 +166,5 @@ public class Models<T extends Model> extends ArrayList<T>
 		if (to > size()) to = size();
 		return new Models(super.subList(from,to));
 	}
+
 }

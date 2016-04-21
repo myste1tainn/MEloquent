@@ -74,7 +74,7 @@ public class Config {
 
 	public static void load(String configFileName) {
 		try {
-//			Config.initLog4j();
+			Config.initLog4j();
 
 			if (config == null) {
 				config = new HashMap<String, String>();

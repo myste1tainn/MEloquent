@@ -21,6 +21,7 @@ public class Builder
 	private Object[] vals;              // Values
 
 	private String table;
+	public boolean raw = false;
 
 	public Builder()
 	{
@@ -82,17 +83,26 @@ public class Builder
 	private Type type;
 	public String build(Type type) throws SQLException
 	{
+		String sql = "";
 		this.type = type;
 		switch(type)
 		{
 			case SELECT:
-				return buildSelect();
+				sql = buildSelect();
+				this.raw = true;
+				return sql;
 			case INSERT:
-				return buildInsert();
+				sql = buildInsert();
+				this.raw = true;
+				return sql;
 			case UPDATE:
-				return buildUpdate();
+				sql = buildUpdate();
+				this.raw = true;
+				return sql;
 			case DELETE:
-				return buildDelete();
+				sql =  buildDelete();
+				this.raw = true;
+				return sql;
 			default:
 				throw new SQLException("Cannot build SQL, no SQL type was specified");
 		}
